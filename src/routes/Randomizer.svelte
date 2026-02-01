@@ -17,7 +17,7 @@
     import { fade } from "svelte/transition";
     import { onMount } from "svelte";
     import { Shuffle } from "carbon-icons-svelte";
-    import { type Randomized, results } from "$lib/assets/results.svelte";
+    import { type Randomized, results } from "$lib/results.svelte";
     import icon from "$lib/assets/favicon.svg";
 
     let isPoolEmpty: boolean = $derived(selection.courses.length == 0 || selection.partitions.length == 0 || $results.length == 0);
