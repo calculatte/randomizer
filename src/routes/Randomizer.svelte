@@ -20,7 +20,7 @@
     import { type Randomized, results } from "$lib/results.svelte";
     import icon from "$lib/assets/favicon.svg";
 
-    let isPoolEmpty: boolean = $derived(selection.courses.length == 0 || selection.partitions.length == 0 || $results.length == 0);
+    let isSelectionEmpty: boolean = $derived(selection.courses.length == 0 || selection.partitions.length == 0);
     let result: Promise<Randomized[]> = $state(Promise.resolve([]));
     let treeview: TreeView|null = $state(null);
     let expandTree: boolean = $state(false);
@@ -140,7 +140,7 @@
     <h4 class="heading">Problem Pool</h4>
     <p class="subheading">The following pool will be used to generate a randomized list of problems.</p>
     <div class="divider"></div>
-    {#if isPoolEmpty}
+    {#if isSelectionEmpty}
         <div style="display: flex;">
             <InlineNotification
                 lowContrast
@@ -153,7 +153,7 @@
         </div>
     {/if}
 </Tile>
-{#if !isPoolEmpty}
+{#if !isSelectionEmpty}
     <div style="max-height: 30vh; overflow-y: auto;">
     {#each selection.courses as course (course.id)}
         <ContainedList labelText={course.name} kind="disclosed" size="sm">
@@ -185,7 +185,7 @@
             </Column>
             <Column>
                 <div style="display: flex; justify-content: end;">
-                    <Button icon={Shuffle} disabled={isPoolEmpty} on:click={() => result = randomize()} style="flex: 0;">
+                    <Button icon={Shuffle} disabled={isSelectionEmpty} on:click={() => result = randomize()} style="flex: 0;">
                         Randomize
                     </Button>
                 </div>
