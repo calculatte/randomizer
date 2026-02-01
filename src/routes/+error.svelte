@@ -1,6 +1,7 @@
 <script lang="ts">
     import { Button } from "carbon-components-svelte";
     import { IbmWatsonDiscovery, Home } from "carbon-icons-svelte";
+    import { Home as HomeRef } from "$lib/routes";
     import { page } from "$app/state";
 </script>
 
@@ -37,10 +38,10 @@
         </div>
         <p>Did you know that <code class="code">12 x 2 + 64 x 3 + 284 - 48 x 2</code> is <code class="code">404</code>?</p>
         <p>Try looking for a different page.</p>
-        <Button style="margin-top: 16px;" href="/" icon={Home}>Go Home</Button>
+        <Button style="margin-top: 16px;" href={HomeRef} icon={Home}>Go Home</Button>
     {:else}
         <h1>{page.status}</h1>
         <p>{page.error?.message}</p>
-        <Button style="margin-top: 16px;" href="/" icon={Home}>Go Home</Button>
+        <Button style="margin-top: 16px;" href={HomeRef} icon={Home}>Go Home</Button>
     {/if}
 </div>

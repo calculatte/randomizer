@@ -5,6 +5,7 @@
     import Randomizer from "./Randomizer.svelte";
 
     import { ArrowRight, IbmKnowledgeCatalog } from "carbon-icons-svelte";
+    import { Courses } from "$lib/routes";
     import { config } from "$lib/config.svelte.js";
 </script>
 
@@ -45,7 +46,7 @@
             <Row>
                 <Column>
                     <div style="display: flex; justify-content: center;">
-                        <Button icon={ArrowRight} href="/courses">Go to course builder</Button>
+                        <Button icon={ArrowRight} href={Courses}>Go to course builder</Button>
                     </div>
                 </Column>
             </Row>

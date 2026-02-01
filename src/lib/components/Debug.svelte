@@ -1,6 +1,7 @@
 <script lang="ts">
     import { HeaderGlobalAction } from "carbon-components-svelte";
     import { Debug, Settings } from "carbon-icons-svelte";
+    import { Settings as SettingsRef } from "$lib/routes";
 
     import { config } from "$lib/config.svelte.js";
     import { toast } from "$lib/toast.svelte";
@@ -33,6 +34,6 @@
         tooltipAlignment="end"
         iconDescription="Application Settings"
         icon={Settings}
-        href="/settings"
+        href={SettingsRef}
     />
 {/if}

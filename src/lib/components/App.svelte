@@ -20,6 +20,7 @@
         IbmKnowledgeCatalog
     } from "carbon-icons-svelte";
 
+    import { Home, Courses, Settings } from "$lib/routes";
     import DownloadConfig from "$lib/components/DownloadConfig.svelte";
     import LightSwitch from "$lib/components/LightSwitch.svelte";
     import Debug from "$lib/components/Debug.svelte";
@@ -193,9 +194,9 @@
     </svelte:fragment>
 
     <HeaderNav>
-        <HeaderNavItem isSelected={isActive("/")} href="/" text="Randomizer" />
-        <HeaderNavItem isSelected={isActive("/courses")} href="/courses" text="Courses" />
-        <HeaderNavItem isSelected={isActive("/settings")} href="/settings" text="Settings" />
+        <HeaderNavItem isSelected={isActive(Home)} href={Home} text="Randomizer" />
+        <HeaderNavItem isSelected={isActive(Courses)} href={Courses} text="Courses" />
+        <HeaderNavItem isSelected={isActive(Settings)} href={Settings} text="Settings" />
     </HeaderNav>
 
     <HeaderUtilities>
@@ -213,9 +214,9 @@
 
 <SideNav bind:isOpen={isSideNavOpen} class="animated-sidenav">
     <SideNavItems>
-        <SideNavLink icon={ChangeCatalog} isSelected={isActive("/")} href="/">Randomizer</SideNavLink>
+        <SideNavLink icon={ChangeCatalog} isSelected={isActive(Home)} href={Home}>Randomizer</SideNavLink>
         <SideNavDivider />
-        <SideNavLink icon={IbmKnowledgeCatalog} isSelected={isActive("/courses")} href="/courses">Courses</SideNavLink>
-        <SideNavLink icon={SettingsEdit} isSelected={isActive("/settings")} href="/settings">Settings</SideNavLink>
+        <SideNavLink icon={IbmKnowledgeCatalog} isSelected={isActive(Courses)} href={Courses}>Courses</SideNavLink>
+        <SideNavLink icon={SettingsEdit} isSelected={isActive(Settings)} href={Settings}>Settings</SideNavLink>
     </SideNavItems>
 </SideNav>
