@@ -37,8 +37,8 @@
             </Row>
             <Row>
                 <Column>
-                    <div style="display: flex; justify-content: center;">
-                        <IbmKnowledgeCatalog size={48}/>
+                    <div style="display: flex; justify-content: center; scale: 2;">
+                        <IbmKnowledgeCatalog size={32}/>
                     </div>
                 </Column>
             </Row>
