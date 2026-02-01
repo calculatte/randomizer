@@ -7,11 +7,11 @@ const config = {
 			pages: 'build',
 			assets: 'build',
 			fallback: '404.html',
-			precompile: false,
+			precompress: false,
 			strict: true
 		}),
 		paths: {
-			base: '/randomizer'
+			base: process.argv.includes('dev') ? '' : process.env.BASE_PATH
 		}
 	}
 };
