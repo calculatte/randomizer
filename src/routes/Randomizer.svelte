@@ -12,6 +12,7 @@
         TreeView
     } from "carbon-components-svelte";
 
+    import { type Course } from "$lib/types/Course.svelte";
     import { Partition } from "$lib/types/Partition.svelte";
     import { selection } from "./shared.svelte";
     import { fade } from "svelte/transition";
@@ -32,8 +33,13 @@
         }
     });
 
-    function getPoolName(partition: Partition): string {
-        return partition.name + " (" + partition.runtime.range[0] + " — " + partition.runtime.range[1] + ")";
+    function getPartitionLabel(partition: Partition): string {
+        return partition.name + ": Problems " + partition.runtime.range[0] + " — " + partition.runtime.range[1] + "";
+    }
+
+    function getCourseLabel(course: Course): string {
+        let suffix: string = course.runtime.numberOfProblems == 1 ? "" : "s";
+        return course.name + ` (${course.runtime.numberOfProblems} Problem${suffix})`;
     }
 
     function getRandomNumber(min: number, max: number) {
@@ -156,10 +162,10 @@
 {#if !isSelectionEmpty}
     <div style="max-height: 30vh; overflow-y: auto;">
     {#each selection.courses as course (course.id)}
-        <ContainedList labelText={course.name} kind="disclosed" size="sm">
+        <ContainedList labelText={getCourseLabel(course)} kind="disclosed" size="sm">
         {#each course.partitions as partition (partition.id)}
             {#if partition.runtime.selected && partition.parent.id === course.id}
-                <ContainedListItem>{getPoolName(partition)}</ContainedListItem>
+                <ContainedListItem>{getPartitionLabel(partition)}</ContainedListItem>
             {/if}
         {/each}
         </ContainedList>
