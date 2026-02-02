@@ -17,14 +17,17 @@
     import { selection } from "./shared.svelte";
     import { fade } from "svelte/transition";
     import { onMount } from "svelte";
-    import { Shuffle } from "carbon-icons-svelte";
+    import { Shuffle, TrashCan, Undo } from "carbon-icons-svelte";
     import { type Randomized, results } from "$lib/results.svelte";
     import icon from "$lib/assets/favicon.svg";
 
     let isSelectionEmpty: boolean = $derived(selection.courses.length == 0 || selection.partitions.length == 0);
+    let isProcessing: boolean = $state(false);
+    let cache: Randomized[] = $state([]);
     let result: Promise<Randomized[]> = $state(Promise.resolve([]));
     let treeview: TreeView|null = $state(null);
     let expandTree: boolean = $state(false);
+    let clearedTree: boolean = $state(false);
 
     onMount(() => {
         if ($results.length > 0) {
@@ -47,6 +50,8 @@
     }
 
     async function randomize(): Promise<Randomized[]> {
+        isProcessing = true;
+
         return new Promise((resolve, reject) => {
             setTimeout(() => {
                 try {
@@ -122,7 +127,9 @@
                         }
                     }
 
+                    clearedTree = false;
                     expandTree = true;
+                    cache = output;
                     $results = output;
 
                     resolve(output);
@@ -130,8 +137,23 @@
                     console.error(error);
                     reject(error);
                 }
+
+                isProcessing = false;
             }, getRandomNumber(1000, 2500));
         });
+    }
+
+    function handleClearList(): void {
+        cache = [];
+        result = Promise.resolve([]);
+        clearedTree = true;
+    }
+
+    function handleUndoClear(): void {
+        expandTree = true;
+        cache = $results;
+        result = Promise.resolve($results);
+        clearedTree = false;
     }
 
     $effect(() => {
@@ -191,16 +213,20 @@
             </Column>
             <Column>
                 <div style="display: flex; justify-content: end;">
-                    <Button icon={Shuffle} disabled={isSelectionEmpty} on:click={() => result = randomize()} style="flex: 0;">
+                    <Button icon={Shuffle} disabled={isSelectionEmpty || isProcessing} on:click={() => result = randomize()} style="flex: 0;">
                         Randomize
                     </Button>
+                    <Button icon={Undo} disabled={isSelectionEmpty || isProcessing || !clearedTree} on:click={handleUndoClear} iconDescription="Undo clear" kind="secondary" />
+                    <Button icon={TrashCan} disabled={isSelectionEmpty || isProcessing || cache.length == 0} on:click={handleClearList} iconDescription="Clear list" kind="secondary" />
                 </div>
             </Column>
         </Row>
     </Grid>
     <div class="divider"></div>
     {#await result}
-        <InlineLoading status="active" description="Generating..."/>
+        <div style="margin-top: 8px;">
+            <InlineLoading status="active" description="Generating..."/>
+        </div>
     {:then output}
         <div in:fade>
             {#if output.length === 0}
@@ -215,20 +241,22 @@
                     />
                 </div>
             {:else}
-                <TreeView
-                    labelText="Results"
-                    size="compact"
-                    nodes={output}
-                    bind:this={treeview}
-                    let:node
-                >
-                <span
-                    style:text-decoration={node.id.toString().endsWith("partition") ? "underline" : "inherit"}
-                    style:font-weight={node.id.toString().endsWith("course") ? "bold" : "inherit"}
-                >
-                    {node.text}
-                </span>
-                </TreeView>
+                <div style="margin-top: 16px;">
+                    <TreeView
+                        labelText="Results"
+                        size="compact"
+                        nodes={output}
+                        bind:this={treeview}
+                        let:node
+                    >
+                    <span
+                        style:text-decoration={node.id.toString().endsWith("partition") ? "underline" : "inherit"}
+                        style:font-weight={node.id.toString().endsWith("course") ? "bold" : "inherit"}
+                    >
+                        {node.text}
+                    </span>
+                    </TreeView>
+                </div>
             {/if}
         </div>
     {:catch error}
