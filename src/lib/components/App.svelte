@@ -141,7 +141,7 @@
         padding-left: 0 !important;
     }
 
-    :root[theme="g90"] {
+    :root[theme="g90"][theme="g100"] {
         :global(.rangeSlider) {
             --range-handle-inactive: color-mix(in srgb, var(--cds-ui-05) 100%, black 10%);
         }

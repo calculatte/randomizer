@@ -13,12 +13,26 @@
     toggles.push({
         title: "Dark mode",
         description: "Switch between light and dark mode.",
-        get: () => $theme === "g90",
+        get: () => $theme === "g90" || $theme === "g100",
         set: (state) => {
             if (state) {
                 $theme = "g90";
             } else {
                 $theme = "g10";
+            }
+        }
+    });
+
+    toggles.push({
+        title: "Midnight theme",
+        description: "Activate the midnight theme for dark mode.",
+        disabled: () => $theme !== "g90" && $theme !== "g100",
+        get: () => $theme === "g100",
+        set: (state) => {
+            if (state) {
+                $theme = "g100";
+            } else {
+                $theme = "g90";
             }
         }
     });
@@ -82,7 +96,7 @@
                     <Toggle
                         labelText={toggle.description}
                         toggled={toggle.get()}
-                        disabled={toggle.disabled === undefined ? false : toggle.disabled}
+                        disabled={toggle.disabled === undefined ? false : (typeof toggle.disabled == 'function' ? toggle.disabled() : toggle.disabled)}
                         on:toggle={e => toggle.set(e.detail.toggled)}
                     />
                 </Column>
