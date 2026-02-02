@@ -57,7 +57,7 @@
                             min={1}
                             max={course.getNumberOfProblems()}
                             step={1}
-                            pipstep={1}
+                            pipstep={1000}
                             first="label"
                             last="label"
                             all={false}
@@ -113,7 +113,7 @@
                                 min={partition.getStartAt()}
                                 max={partition.getEndAt()}
                                 step={1}
-                                pipstep={1}
+                                pipstep={1000}
                                 first="label"
                                 last="label"
                                 all={false}
