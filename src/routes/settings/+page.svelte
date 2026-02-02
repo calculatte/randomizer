@@ -62,6 +62,10 @@
         disabled: true
     });
 
+    function isSettingDisabled(setting: Setting<any>): boolean {
+        return setting.disabled === undefined ? false : (typeof setting.disabled == 'function' ? setting.disabled() : setting.disabled);
+    }
+
     onMount(() => {
         mounted = true;
     });
@@ -110,14 +114,14 @@
                 <Column>
                     <p
                         class="heading"
-                        style:color={toggle.disabled !== undefined && toggle.disabled ? "var(--cds-disabled-03)" : "inherit"}
+                        style:color={isSettingDisabled(toggle) ? "var(--cds-disabled-03)" : "inherit"}
                     >
                         {toggle.title}
                     </p>
                     <Toggle
                         labelText={toggle.description}
                         toggled={toggle.get()}
-                        disabled={toggle.disabled === undefined ? false : (typeof toggle.disabled == 'function' ? toggle.disabled() : toggle.disabled)}
+                        disabled={isSettingDisabled(toggle)}
                         on:toggle={e => toggle.set(e.detail.toggled)}
                     />
                 </Column>
