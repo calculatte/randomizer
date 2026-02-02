@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { Column, Content, Grid, Row, Toggle } from "carbon-components-svelte";
+    import { Column, Row, Toggle } from "carbon-components-svelte";
     import { Settings } from "carbon-icons-svelte";
     import { type Setting } from "./types/Setting.ts";
 
@@ -56,41 +56,37 @@
     }
 </style>
 
-<Content>
-    <Grid>
-        <Row>
-            <Column>
-                <div style="display: flex; align-items: center;">
-                    <Settings size={32} style="margin-right: 8px" />
-                    <h1 class="title">Settings</h1>
-                </div>
-                <p class="subheading" style="margin-top: 8px">Manage application settings</p>
-            </Column>
-        </Row>
-        <div class="divider"></div>
-        {#if mounted}
-            {#each toggles as toggle, i}
-                <div in:slide|global style="margin-top: 8px;">
-                    <Row>
-                        <Column>
-                            <p
-                                class="heading"
-                                style:color={toggle.disabled !== undefined && toggle.disabled ? "var(--cds-disabled-03)" : "inherit"}
-                            >{toggle.title}
-                            </p>
-                            <Toggle
-                                labelText={toggle.description}
-                                toggled={toggle.get()}
-                                disabled={toggle.disabled === undefined ? false : toggle.disabled}
-                                on:toggle={e => toggle.set(e.detail.toggled)}
-                            />
-                        </Column>
-                    </Row>
-                    {#if i < toggles.length - 1}
-                        <div class="divider"></div>
-                    {/if}
-                </div>
-            {/each}
-        {/if}
-    </Grid>
-</Content>
+<Row>
+    <Column>
+        <div style="display: flex; align-items: center;">
+            <Settings size={32} style="margin-right: 8px" />
+            <h1 class="title">Settings</h1>
+        </div>
+        <p class="subheading" style="margin-top: 8px">Manage application settings</p>
+    </Column>
+</Row>
+
+<div class="divider"></div>
+
+{#if mounted}
+    {#each toggles as toggle}
+        <div in:slide|global style="margin-top: 8px;">
+            <Row>
+                <Column>
+                    <p
+                        class="heading"
+                        style:color={toggle.disabled !== undefined && toggle.disabled ? "var(--cds-disabled-03)" : "inherit"}
+                    >
+                        {toggle.title}
+                    </p>
+                    <Toggle
+                        labelText={toggle.description}
+                        toggled={toggle.get()}
+                        disabled={toggle.disabled === undefined ? false : toggle.disabled}
+                        on:toggle={e => toggle.set(e.detail.toggled)}
+                    />
+                </Column>
+            </Row>
+        </div>
+    {/each}
+{/if}
