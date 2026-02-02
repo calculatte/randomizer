@@ -4,7 +4,7 @@
 
     import { goto } from "$app/navigation";
     import { config } from "$lib/config.svelte";
-    import { isResetOpen } from "./stores.svelte";
+    import { isResetOpen } from "./settings.svelte";
 
     let understood: boolean = $state(false);
 
