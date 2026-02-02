@@ -33,7 +33,7 @@ export class Config {
     }
 
     public download(): void {
-        const json = JSON.stringify(this.courses, null, 2);
+        const json = JSON.stringify(this, null, 2);
         const blob = new Blob([json], { type: "application/json" });
         const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
