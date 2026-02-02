@@ -1,11 +1,14 @@
 <script lang="ts">
-    import { Column, Row, Toggle } from "carbon-components-svelte";
-    import { Settings } from "carbon-icons-svelte";
+    import { Button, Column, Row, Toggle } from "carbon-components-svelte";
+    import { Settings, TrashCan } from "carbon-icons-svelte";
     import { type Setting } from "./types/Setting.ts";
 
     import { onMount } from "svelte";
     import { slide } from "svelte/transition";
+    import { isResetOpen } from "./stores.svelte.ts";
     import { theme, notifyOnReload, developerMode } from "$lib/store";
+
+    import ConfirmReset from "./ConfirmReset.svelte";
 
     let mounted: boolean = $state(false);
     let toggles: Setting<boolean>[] = $state([]);
@@ -70,6 +73,8 @@
     }
 </style>
 
+<ConfirmReset />
+
 <Row>
     <Column>
         <div style="display: flex; align-items: center;">
@@ -83,6 +88,22 @@
 <div class="divider"></div>
 
 {#if mounted}
+    <div in:slide style="display: flex; margin-top: 8px; align-items: center;">
+        <Button
+            style="margin-top: 8px; margin-right: 8px;"
+            kind="danger-tertiary"
+            iconDescription="Reset"
+            icon={TrashCan}
+            on:click={() => ($isResetOpen = true)}
+        />
+        <div>
+            <p class="heading" style="color: inerhit;">Clear config</p>
+            <p class="note">Reset the config back to its default state.</p>
+        </div>
+    </div>
+
+    <div in:slide class="divider"></div>
+
     {#each toggles as toggle}
         <div in:slide|global style="margin-top: 8px;">
             <Row>
