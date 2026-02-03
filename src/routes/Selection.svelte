@@ -2,6 +2,7 @@
     import {
         Accordion,
         AccordionItem,
+        Button,
         Checkbox,
         Column,
         Grid, InlineNotification,
@@ -9,9 +10,33 @@
         Tile
     } from "carbon-components-svelte";
 
+    import { ListBoxes, ListChecked } from "carbon-icons-svelte";
     import { RangeSlider } from "svelte-range-slider-pips";
+
     import { config } from "$lib/config.svelte.js";
     import { selection } from "./shared.svelte";
+    import { onMount } from "svelte";
+    import { isMobileDevice } from "$lib/util";
+
+    let isMobile: boolean = $state(false);
+
+    onMount(() => {
+        isMobile = isMobileDevice(window);
+    });
+
+    function toggleAll(state: boolean): void {
+        $config.courses.forEach(course => {
+            if (course.partitions.length > 0) {
+                course.runtime.selected = state;
+
+                course.partitions.forEach(partition => {
+                    partition.runtime.selected = state;
+                });
+            } else if (!state) {
+                course.runtime.selected = state;
+            }
+        });
+    }
 </script>
 
 <style>
@@ -26,8 +51,26 @@
 </style>
 
 <Tile>
-    <h4 class="heading">Select Courses</h4>
-    <p class="subheading">Choose which courses and partitions to get randomized problems from.</p>
+    <Grid condensed style="padding: var(--cds-spacing-05, 1rem); padding-bottom: 0; padding-top: 0;">
+        <Row>
+            <Column>
+                <h4 class="heading">Select Courses</h4>
+                <p class="subheading">Choose which courses and partitions to get randomized problems from.</p>
+            </Column>
+            <Column>
+                <div style="display: flex; justify-content: end;">
+                    {#if isMobile}
+                        <Button icon={ListChecked} on:click={() => toggleAll(true)} />
+                    {:else}
+                        <Button icon={ListChecked} on:click={() => toggleAll(true)}>
+                            Select all
+                        </Button>
+                    {/if}
+                    <Button icon={ListBoxes} on:click={() => toggleAll(false)} iconDescription="Deselect all" kind="secondary" />
+                </div>
+            </Column>
+        </Row>
+    </Grid>
     <div class="divider"></div>
 </Tile>
 {#each $config.courses as course}
