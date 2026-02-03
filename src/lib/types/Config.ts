@@ -3,9 +3,11 @@ import type { Partition } from "$lib/types/Partition.svelte";
 import type { Serializer } from "svelte-persisted-store";
 
 export class Config {
+    version: string;
     courses: Course[];
 
     constructor(courses?: Course[]) {
+        this.version = "0.0.1";
         this.courses = courses || [];
     }
 
