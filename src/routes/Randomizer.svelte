@@ -123,7 +123,18 @@
                             }
 
                             index += 1;
-                            section.nodes.push({ id: index, text: Array.from(section.problems).sort((a, b) => a - b).join(", ") });
+
+                            if (section.problems.size == 0) {
+                                section.nodes.push({
+                                    id: index,
+                                    text: "No problems were assigned."
+                                });
+                            } else {
+                                section.nodes.push({
+                                    id: index,
+                                    text: Array.from(section.problems).sort((a, b) => a - b).join(", ")
+                                });
+                            }
                         }
                     }
 
