@@ -29,7 +29,6 @@
     toggles.push({
         title: "Midnight theme",
         description: "Activate the midnight theme for dark mode.",
-        disabled: () => $theme !== "g90" && $theme !== "g100",
         get: () => $theme === "g100",
         set: (state) => {
             if (state) {
