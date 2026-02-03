@@ -5,7 +5,7 @@
 
     import { config } from "$lib/config.svelte.js";
     import { toast } from "$lib/toast.svelte";
-    import { developerMode } from "$lib/store";
+    import { developerMode } from "$lib/setting.svelte";
     import RickRoll from "$lib/components/RickRoll.svelte";
 
     let rickrolling: boolean = $state(false);

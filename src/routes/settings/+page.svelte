@@ -6,7 +6,7 @@
     import { onMount } from "svelte";
     import { slide } from "svelte/transition";
     import { isResetOpen } from "./settings.svelte.ts";
-    import { theme, notifyOnReload, developerMode } from "$lib/store";
+    import { theme, midnight, notifyOnReload, developerMode } from "$lib/setting.svelte";
 
     import ConfirmReset from "./ConfirmReset.svelte";
 
@@ -31,6 +31,8 @@
         description: "Activate the midnight theme for dark mode.",
         get: () => $theme === "g100",
         set: (state) => {
+            $midnight = state;
+
             if (state) {
                 $theme = "g100";
             } else {

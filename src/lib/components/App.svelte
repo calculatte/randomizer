@@ -27,7 +27,7 @@
     import Toast from "$lib/components/Toast.svelte";
 
     import { page } from "$app/state";
-    import { theme } from "$lib/store";
+    import { theme } from "$lib/setting.svelte";
     import { onMount } from "svelte";
     import { cubicInOut } from "svelte/easing";
 

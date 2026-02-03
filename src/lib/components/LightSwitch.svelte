@@ -2,7 +2,7 @@
     import { HeaderGlobalAction } from "carbon-components-svelte";
     import { Asleep, LightFilled } from "carbon-icons-svelte";
 
-    import { theme } from "$lib/store";
+    import { theme, midnight } from "$lib/setting.svelte";
 </script>
 
 <HeaderGlobalAction
@@ -11,7 +11,7 @@
     icon={$theme === "g10" ? Asleep : LightFilled}
     onclick={() => {
         if ($theme === "g10") {
-            $theme = "g90";
+            $theme = $midnight ? "g100" : "g90";
         } else {
             $theme = "g10";
         }
