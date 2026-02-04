@@ -41,6 +41,12 @@
         });
     }
 
+    function handleCourseToggleAll(course: Course, state: boolean): void {
+        course.partitions.forEach(partition => {
+            partition.runtime.selected = state;
+        });
+    }
+
     function handleCourseAmount(course: Course, amount: number | null): void {
         if (typeof amount == "number") {
             if (amount < 1) {
@@ -53,6 +59,19 @@
         } else {
             course.runtime.numberOfProblems = 1;
         }
+    }
+
+    function isCourseIndeterminate(course: Course): boolean {
+        let selections = course.partitions.map(partition => partition.runtime.selected);
+        let nSelected = 0;
+
+        selections.forEach(state => {
+            if (state) {
+                nSelected++;
+            }
+        });
+
+        return nSelected > 0 && nSelected < course.partitions.length;
     }
 </script>
 
@@ -103,6 +122,16 @@
                         bind:checked={course.runtime.selected}
                         on:check={() => {
                             selection.courses = $config.getSelectedCourses();
+                        }}
+                    />
+                    <Checkbox
+                        style="margin-top: 16px;"
+                        labelText="Select all"
+                        helperText="Get problems from all partitions in {course.name}."
+                        disabled={course.partitions.length === 0 || !course.runtime.selected}
+                        indeterminate={isCourseIndeterminate(course)}
+                        on:check={(event) => {
+                            handleCourseToggleAll(course, event.detail);
                         }}
                     />
                 </Column>
