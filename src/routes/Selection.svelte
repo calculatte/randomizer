@@ -5,7 +5,9 @@
         Button,
         Checkbox,
         Column,
-        Grid, InlineNotification,
+        Grid,
+        InlineNotification,
+        NumberInput,
         Row,
         Tile
     } from "carbon-components-svelte";
@@ -17,6 +19,7 @@
     import { selection } from "./shared.svelte";
     import { onMount } from "svelte";
     import { isMobileDevice } from "$lib/util";
+    import type { Course } from "$lib/types/Course.svelte";
 
     let isMobile: boolean = $state(false);
 
@@ -36,6 +39,20 @@
                 course.runtime.selected = state;
             }
         });
+    }
+
+    function handleCourseAmount(course: Course, amount: number | null): void {
+        if (typeof amount == "number") {
+            if (amount < 1) {
+                course.runtime.numberOfProblems = 1;
+            } else if (amount > course.getNumberOfProblems()) {
+                course.runtime.numberOfProblems = course.getNumberOfProblems();
+            } else {
+                course.runtime.numberOfProblems = amount;
+            }
+        } else {
+            course.runtime.numberOfProblems = 1;
+        }
     }
 </script>
 
@@ -73,6 +90,7 @@
     </Grid>
     <div class="divider"></div>
 </Tile>
+
 {#each $config.courses as course}
     <Tile>
         <Grid condensed style="padding: var(--cds-spacing-05, 1rem); padding-bottom: 0; padding-top: 0;">
@@ -90,22 +108,17 @@
                 </Column>
                 <Column>
                     {#if course.getNumberOfProblems() > 0}
-                        <div style="display: flex; justify-content: center;">
-                            <p class="note">Number of problems ({course.runtime.numberOfProblems})</p>
-                        </div>
-                        <RangeSlider
-                            id="always"
-                            value={course.runtime.numberOfProblems}
-                            disabled={!course.runtime.selected}
+                        <NumberInput
+                            light={true}
                             min={1}
                             max={course.getNumberOfProblems()}
-                            step={1}
-                            pipstep={1000}
-                            first="label"
-                            last="label"
-                            all={false}
-                            pips
-                            on:change={(event) => course.runtime.numberOfProblems = event.detail.value}
+                            invalid={course.runtime.numberOfProblems < 1 || course.runtime.numberOfProblems > course.getNumberOfProblems()}
+                            labelText="Number of problems"
+                            helperText="Select the number of problems to pick from this course."
+                            invalidText="Problem amount must be greater than 1 and less than {course.getNumberOfProblems()}."
+                            disabled={!course.runtime.selected}
+                            bind:value={course.runtime.numberOfProblems}
+                            on:change={(event) => handleCourseAmount(course, event.detail)}
                         />
                     {:else}
                         <div style="display: flex;">
