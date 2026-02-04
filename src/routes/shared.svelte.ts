@@ -1,3 +1,4 @@
+import { writable, type Writable } from "svelte/store";
 import type { Course } from "$lib/types/Course.svelte";
 import type { Partition } from "$lib/types/Partition.svelte";
 
@@ -11,3 +12,4 @@ export const selection: SelectionState = $state({
     partitions: []
 });
 
+export const numberOfProblems: Writable<number | null> = writable(null);

@@ -1,6 +1,7 @@
 <script lang="ts">
     import {
         Button,
+        Checkbox,
         Column,
         ContainedList,
         ContainedListItem,
@@ -17,6 +18,7 @@
     import { selection } from "./shared.svelte";
     import { fade } from "svelte/transition";
     import { onMount } from "svelte";
+    import { numberOfProblems } from "./shared.svelte";
     import { Shuffle, TrashCan, Undo } from "carbon-icons-svelte";
     import { type Randomized, results } from "$lib/results.svelte";
     import icon from "$lib/assets/favicon.svg";
@@ -28,6 +30,7 @@
     let treeview: TreeView|null = $state(null);
     let expandTree: boolean = $state(false);
     let clearedTree: boolean = $state(false);
+    let hideEmptyNodes: boolean = $state(false);
 
     onMount(() => {
         if ($results.length > 0) {
@@ -41,6 +44,10 @@
     }
 
     function getCourseLabel(course: Course): string {
+        if (typeof $numberOfProblems === "number") {
+            return course.name + " (? Problems)";
+        }
+
         let suffix: string = course.runtime.numberOfProblems == 1 ? "" : "s";
         return course.name + ` (${course.runtime.numberOfProblems} Problem${suffix})`;
     }
@@ -55,8 +62,37 @@
         return new Promise((resolve, reject) => {
             setTimeout(() => {
                 try {
+                    let courses: Course[] = [];
                     let output: Randomized[] = [];
                     let index: number = 0;
+                    let split: number = 0;
+                    let remainder: number = 0;
+                    let numOfProblems: number = 0;
+                    let isGlobal: boolean = false;
+
+                    for (const course of selection.courses) {
+                        let hasPartition = false;
+
+                        for (const partition of course.partitions) {
+                            if (partition.runtime.selected) {
+                                hasPartition = true;
+                                break;
+                            }
+                        }
+
+                        if (hasPartition) {
+                            courses.push(course);
+                        }
+                    }
+
+                    if (typeof $numberOfProblems === "number") {
+                        isGlobal = true;
+                        numOfProblems = $numberOfProblems;
+                        remainder = $numberOfProblems % courses.length;
+                        split = Math.floor($numberOfProblems / courses.length);
+                    }
+
+                    let courseIndex = 0;
 
                     for (const course of selection.courses) {
                         index += 1;
@@ -68,7 +104,7 @@
                             nodes: []
                         });
 
-                        let numberOfProblems: number = 0;
+                        let numberOfAddedProblems: number = 0;
                         let randomized: Randomized = output[output.length - 1];
 
                         const cache: Map<string, Partition> = new Map();
@@ -90,18 +126,43 @@
                         }
 
                         if (randomized.nodes.length === 0) {
-                            index += 1;
-                            randomized.nodes.push({
-                                id: index,
-                                text: "No partitions were selected.",
-                                partitionId: "",
-                                problems: new Set<number>()
-                            });
+                            if (!hideEmptyNodes) {
+                                index += 1;
+                                randomized.nodes.push({
+                                    id: index,
+                                    text: "No partitions were selected.",
+                                    partitionId: "",
+                                    problems: new Set<number>()
+                                });
+                            }                            
 
                             continue;
                         }
 
-                        while (numberOfProblems < course.runtime.numberOfProblems) {
+                        let maxNumberOfProblems: number = 0;
+                        let maxCoursePorblems: number = course.getNumberOfProblems();
+
+                        if (isGlobal) {
+                            if (courseIndex === selection.courses.length - 1) {
+                                maxNumberOfProblems = split + remainder;
+                            } else {
+                                maxNumberOfProblems = split;
+                            }
+
+                            courseIndex += 1;
+                        } else {
+                            maxNumberOfProblems = course.runtime.numberOfProblems;
+                        }
+
+                        while (numberOfAddedProblems < maxNumberOfProblems) {
+                            if (isGlobal && numberOfAddedProblems > numOfProblems) {
+                                break;
+                            }
+
+                            if (numberOfAddedProblems == maxCoursePorblems) {
+                                break;
+                            }
+
                             let randomIndex = getRandomNumber(0, randomized.nodes.length - 1);
                             let section = randomized.nodes[randomIndex];
                             let partition = cache.get(section.partitionId) ?? Partition.empty();
@@ -113,7 +174,7 @@
 
                             if (!section.problems.has(problem)) {
                                 section.problems.add(problem);
-                                numberOfProblems += 1;
+                                numberOfAddedProblems += 1;
                             }
                         }
 
@@ -125,17 +186,34 @@
                             index += 1;
 
                             if (section.problems.size == 0) {
-                                section.nodes.push({
-                                    id: index,
-                                    text: "No problems were assigned."
-                                });
-                            } else {
+                                if (!hideEmptyNodes) {
+                                    section.nodes.push({
+                                        id: index,
+                                        text: "No problems were assigned."
+                                    });
+                                }
+                            } else if (section.problems.size > 0) {
                                 section.nodes.push({
                                     id: index,
                                     text: Array.from(section.problems).sort((a, b) => a - b).join(", ")
                                 });
                             }
                         }
+                    }
+
+                    if (hideEmptyNodes) {
+                        output = output.filter(course => {
+                            let hasAProblem = false;
+
+                            for (const partition of course.nodes) {
+                                if (partition.nodes != null && partition.nodes.length > 0) {
+                                    hasAProblem = true;
+                                    break;
+                                }
+                            }
+
+                            return hasAProblem;
+                        });
                     }
 
                     clearedTree = false;
@@ -219,6 +297,15 @@
                             <h4 class="heading">Your Problems</h4>
                             <p class="subheading">Randomized pool of homework problems.</p>
                         </Column>
+                    </Row>
+                    <Row>
+                        <div style="margin-left: 6px; margin-top: 4px;">
+                            <Checkbox
+                                labelText="Hide missing"
+                                helperText="Do not include empty nodes in the results tree."
+                                bind:checked={hideEmptyNodes}
+                            />
+                        </div>
                     </Row>
                 </Grid>
             </Column>
