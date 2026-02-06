@@ -19,7 +19,7 @@
     import { config } from "$lib/config.svelte.js";
     import { selection } from "./shared.svelte";
     import { onMount } from "svelte";
-    import { isMobileDevice } from "$lib/util";
+    import { isMobileDevice } from "$lib/util/misc";
     import { numberOfProblems } from "./shared.svelte";
 
     let isMobile: boolean = $state(false);

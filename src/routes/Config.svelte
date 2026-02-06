@@ -5,7 +5,7 @@
 
     import { toast } from "$lib/toast.svelte";
     import { config } from "$lib/config.svelte.js";
-    import { isMobileDevice } from "$lib/util";
+    import { isMobileDevice } from "$lib/util/misc";
     import { onMount } from "svelte";
 
     let isMobile: boolean = $state(false);
