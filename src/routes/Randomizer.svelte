@@ -81,7 +81,7 @@
                 }
 
                 isProcessing = false;
-            }, getRandomNumber(1000, 2500));
+            }, getRandomNumber(500, 1000));
         });
     }
 
