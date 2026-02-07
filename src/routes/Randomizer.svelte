@@ -13,20 +13,20 @@
         TreeView
     } from "carbon-components-svelte";
 
+    import { config } from "$lib/config.svelte";
+    import { getRandomNumber, globalPoolSize, randomizer, selection } from "$lib/util/randomize.svelte";
+    import { type CourseNode, results } from "$lib/results.svelte";
     import { type Course } from "$lib/types/Course.svelte";
     import { Partition } from "$lib/types/Partition.svelte";
-    import { selection } from "./shared.svelte";
     import { fade } from "svelte/transition";
     import { onMount } from "svelte";
-    import { numberOfProblems } from "./shared.svelte";
     import { Shuffle, TrashCan, Undo } from "carbon-icons-svelte";
-    import { type Randomized, results } from "$lib/results.svelte";
     import icon from "$lib/assets/favicon.svg";
 
     let isSelectionEmpty: boolean = $derived(selection.courses.length == 0 || selection.partitions.length == 0);
     let isProcessing: boolean = $state(false);
-    let cache: Randomized[] = $state([]);
-    let result: Promise<Randomized[]> = $state(Promise.resolve([]));
+    let cache: CourseNode[] = $state([]);
+    let result: Promise<CourseNode[]> = $state(Promise.resolve([]));
     let treeview: TreeView|null = $state(null);
     let expandTree: boolean = $state(false);
     let clearedTree: boolean = $state(false);
@@ -44,7 +44,7 @@
     }
 
     function getCourseLabel(course: Course): string {
-        if (typeof $numberOfProblems === "number") {
+        if (typeof $globalPoolSize === "number") {
             return course.name + " (? Problems)";
         }
 
@@ -52,169 +52,22 @@
         return course.name + ` (${course.runtime.numberOfProblems} Problem${suffix})`;
     }
 
-    function getRandomNumber(min: number, max: number) {
-        return Math.floor(Math.random() * (max - min + 1)) + min;
-    }
-
-    async function randomize(): Promise<Randomized[]> {
+    async function randomize(): Promise<CourseNode[]> {
         isProcessing = true;
 
         return new Promise((resolve, reject) => {
             setTimeout(() => {
                 try {
-                    let courses: Course[] = [];
-                    let output: Randomized[] = [];
-                    let index: number = 0;
-                    let split: number = 0;
-                    let remainder: number = 0;
-                    let numOfProblems: number = 0;
-                    let isGlobal: boolean = false;
+                    const poolSize: number = $globalPoolSize ?? 0;
+                    const pullFromAll: boolean = typeof $globalPoolSize === "number";
 
-                    for (const course of selection.courses) {
-                        let hasPartition = false;
-
-                        for (const partition of course.partitions) {
-                            if (partition.runtime.selected) {
-                                hasPartition = true;
-                                break;
-                            }
-                        }
-
-                        if (hasPartition) {
-                            courses.push(course);
-                        }
-                    }
-
-                    if (typeof $numberOfProblems === "number") {
-                        isGlobal = true;
-                        numOfProblems = $numberOfProblems;
-                        remainder = $numberOfProblems % courses.length;
-                        split = Math.floor($numberOfProblems / courses.length);
-                    }
-
-                    let courseIndex = 0;
-
-                    for (const course of selection.courses) {
-                        index += 1;
-
-                        output.push({
-                            id: index + "-course",
-                            text: course.name,
-                            courseId: course.id,
-                            nodes: []
-                        });
-
-                        let numberOfAddedProblems: number = 0;
-                        let randomized: Randomized = output[output.length - 1];
-
-                        const cache: Map<string, Partition> = new Map();
-
-                        for (const partition of course.partitions) {
-                            if (partition.runtime.selected) {
-                                index += 1;
-
-                                randomized.nodes.push({
-                                    id: index + "-partition",
-                                    text: partition.name,
-                                    partitionId: partition.id,
-                                    problems: new Set<number>(),
-                                    nodes: []
-                                });
-
-                                cache.set(partition.id, partition);
-                            }
-                        }
-
-                        if (randomized.nodes.length === 0) {
-                            if (!hideEmptyNodes) {
-                                index += 1;
-                                randomized.nodes.push({
-                                    id: index,
-                                    text: "No partitions were selected.",
-                                    partitionId: "",
-                                    problems: new Set<number>()
-                                });
-                            }                            
-
-                            continue;
-                        }
-
-                        let maxNumberOfProblems: number = 0;
-                        let maxCoursePorblems: number = course.getNumberOfProblems();
-
-                        if (isGlobal) {
-                            if (courseIndex === selection.courses.length - 1) {
-                                maxNumberOfProblems = split + remainder;
-                            } else {
-                                maxNumberOfProblems = split;
-                            }
-
-                            courseIndex += 1;
-                        } else {
-                            maxNumberOfProblems = course.runtime.numberOfProblems;
-                        }
-
-                        while (numberOfAddedProblems < maxNumberOfProblems) {
-                            if (isGlobal && numberOfAddedProblems > numOfProblems) {
-                                break;
-                            }
-
-                            if (numberOfAddedProblems == maxCoursePorblems) {
-                                break;
-                            }
-
-                            let randomIndex = getRandomNumber(0, randomized.nodes.length - 1);
-                            let section = randomized.nodes[randomIndex];
-                            let partition = cache.get(section.partitionId) ?? Partition.empty();
-                            let problem = getRandomNumber(partition.runtime.range[0], partition.runtime.range[1]);
-
-                            if (!cache.has(section.partitionId)) {
-                                console.warn(`Section "${section.partitionId}" not found.`);
-                            }
-
-                            if (!section.problems.has(problem)) {
-                                section.problems.add(problem);
-                                numberOfAddedProblems += 1;
-                            }
-                        }
-
-                        for (const section of randomized.nodes) {
-                            if (section.nodes == null) {
-                                continue;
-                            }
-
-                            index += 1;
-
-                            if (section.problems.size == 0) {
-                                if (!hideEmptyNodes) {
-                                    section.nodes.push({
-                                        id: index,
-                                        text: "No problems were assigned."
-                                    });
-                                }
-                            } else if (section.problems.size > 0) {
-                                section.nodes.push({
-                                    id: index,
-                                    text: Array.from(section.problems).sort((a, b) => a - b).join(", ")
-                                });
-                            }
-                        }
-                    }
-
-                    if (hideEmptyNodes) {
-                        output = output.filter(course => {
-                            let hasAProblem = false;
-
-                            for (const partition of course.nodes) {
-                                if (partition.nodes != null && partition.nodes.length > 0) {
-                                    hasAProblem = true;
-                                    break;
-                                }
-                            }
-
-                            return hasAProblem;
-                        });
-                    }
+                    const output: CourseNode[] = randomizer({
+                        config: $config,
+                        selection,
+                        poolSize,
+                        pullFromAll,
+                        hideEmptyNodes
+                    });
 
                     clearedTree = false;
                     expandTree = true;

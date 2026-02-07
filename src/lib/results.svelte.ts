@@ -1,26 +1,42 @@
+import type { Partition } from "./types/Partition.svelte";
+import type { Course } from "./types/Course.svelte";
 import type { TreeNode } from "carbon-components-svelte/src/TreeView/TreeView.svelte";
 import { type Persisted, type Serializer, persisted } from "svelte-persisted-store";
 import { toast } from "$lib/toast.svelte";
 
-export interface Section extends TreeNode {
-    partitionId: string;
+export interface PartitionNode extends TreeNode {
     problems: Set<number>;
 }
 
-export interface Randomized extends TreeNode {
-    courseId: string;
-    nodes: Section[];
+export interface CourseNode extends TreeNode {
+    nodes: PartitionNode[];
 }
 
-const serializer: Serializer<Randomized[]> = {
-    parse(text: string): Randomized[] {
+export function makeCourseNode(course: Course): CourseNode {
+    return {
+        id: course.id,
+        text: course.name,
+        nodes: []
+    };
+}
+
+export function makePartitionNode(partition: Partition): PartitionNode {
+    return {
+        id: partition.id,
+        text: partition.name,
+        problems: new Set()
+    };
+}
+
+const serializer: Serializer<CourseNode[]> = {
+    parse(text: string): CourseNode[] {
         const parsed: any = JSON.parse(text);
-        const results: Randomized[] = [];
+        const results: CourseNode[] = [];
 
         if (Array.isArray(parsed)) {
             parsed.forEach((parent: any): void => {
                 if (typeof parent.courseId == "string") {
-                    let sections: Section[] = [];
+                    let sections: PartitionNode[] = [];
 
                     if (Array.isArray(parent.nodes)) {
                         parent.nodes.forEach((child: any): void => {
@@ -30,7 +46,6 @@ const serializer: Serializer<Randomized[]> = {
                                 sections.push({
                                     id: (child.id as string),
                                     text: (child.text as string),
-                                    partitionId: (child.partitionId as string),
                                     problems: new Set(),
                                     nodes: child.nodes
                                 });
@@ -42,7 +57,6 @@ const serializer: Serializer<Randomized[]> = {
                         sections.push({
                             id: crypto.randomUUID(),
                             text: "No partitions were selected.",
-                            partitionId: "null",
                             problems: new Set()
                         });
                     }
@@ -50,7 +64,6 @@ const serializer: Serializer<Randomized[]> = {
                     results.push({
                         id: (parent.id as string),
                         text: (parent.text as string),
-                        courseId: (parent.courseId as string),
                         nodes: sections
                     });
                 }
@@ -60,12 +73,12 @@ const serializer: Serializer<Randomized[]> = {
         return results;
     },
 
-    stringify(object: Randomized[]): string {
+    stringify(object: CourseNode[]): string {
         return JSON.stringify(object);
     }
 }
 
-export const results: Persisted<Randomized[]> = persisted("results", [], {
+export const results: Persisted<CourseNode[]> = persisted("results", [], {
     serializer,
     syncTabs: true,
     onWriteError: (error) => {

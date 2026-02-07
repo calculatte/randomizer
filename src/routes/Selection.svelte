@@ -17,10 +17,10 @@
 
     import type { Course } from "$lib/types/Course.svelte";
     import { config } from "$lib/config.svelte.js";
-    import { selection } from "./shared.svelte";
     import { onMount } from "svelte";
     import { isMobileDevice } from "$lib/util/misc";
-    import { numberOfProblems } from "./shared.svelte";
+    import { globalPoolSize, selection } from "$lib/util/randomize.svelte";
+    import type { Partition } from "$lib/types/Partition.svelte";
 
     let isMobile: boolean = $state(false);
 
@@ -50,12 +50,17 @@
                 course.runtime.selected = state;
             }
         });
+
+        selection.courses = $config.getSelectedCourses();
+        selection.partitions = $config.getSelectedPartitions();
     }
 
     function handleCourseToggleAll(course: Course, state: boolean): void {
         course.partitions.forEach(partition => {
             partition.runtime.selected = state;
         });
+
+        selection.partitions = $config.getSelectedPartitions();
     }
 
     function handleCourseAmount(course: Course, amount: number | null): void {
@@ -96,27 +101,32 @@
     }
 
     function isGlobalNumberInvalid(): boolean {
-        if (typeof $numberOfProblems !== "number") {
+        if (typeof $globalPoolSize !== "number") {
             return false;
         }
 
-        return $numberOfProblems < 1 || $numberOfProblems > getMaxNumberOfProblems();
+        return $globalPoolSize < 1 || $globalPoolSize > getMaxNumberOfProblems();
     }
 
     function handleGlobalNumber(amount: number | null): void {
         if (typeof amount !== "number") {
-            $numberOfProblems = null;
+            $globalPoolSize = null;
         } else {
             let max: number = getMaxNumberOfProblems();
 
             if (amount < 1) {
-                $numberOfProblems = 1;
+                $globalPoolSize = 1;
             } else if (amount > max) {
-                $numberOfProblems = max;
+                $globalPoolSize = max;
             } else {
-                $numberOfProblems = amount;
+                $globalPoolSize = amount;
             }
         }
+    }
+
+    function handlePartitionRange(partition: Partition, range: number[]): void {
+        partition.runtime.range[0] = range[0];
+        partition.runtime.range[1] = range[1];
     }
 </script>
 
@@ -162,7 +172,7 @@
         labelText="Global number of problems"
         invalidText="Problem amount must be greater than 1 and less than {getMaxNumberOfProblems()}."
         disabled={false}
-        bind:value={$numberOfProblems}
+        bind:value={$globalPoolSize}
         on:change={(event) => handleGlobalNumber(event.detail)}
     />
     <p class="note" style="margin-top: .25rem;">Define how many problems you want randomly generated from <em>all</em> courses.</p>
@@ -204,13 +214,13 @@
                             light={true}
                             min={1}
                             max={course.getNumberOfProblems()}
-                            warn={typeof $numberOfProblems === "number"}
+                            warn={typeof $globalPoolSize === "number"}
                             invalid={course.runtime.numberOfProblems < 1 || course.runtime.numberOfProblems > course.getNumberOfProblems()}
                             labelText="Number of problems"
                             helperText="Select the number of problems to pick from this course."
                             invalidText="Problem amount must be greater than 1 and less than {course.getNumberOfProblems()}."
                             warnText="This value is being overridden by the global number of problems."
-                            disabled={!course.runtime.selected || typeof $numberOfProblems === "number"}
+                            disabled={!course.runtime.selected || typeof $globalPoolSize === "number"}
                             bind:value={course.runtime.numberOfProblems}
                             on:change={(event) => handleCourseAmount(course, event.detail)}
                         />
@@ -258,7 +268,7 @@
                         <Column>
                             <RangeSlider
                                 id="always"
-                                values={partition.runtime.range}
+                                values={[...partition.runtime.range]}
                                 disabled={!partition.runtime.selected || !course.runtime.selected}
                                 min={partition.getStartAt()}
                                 max={partition.getEndAt()}
@@ -270,6 +280,7 @@
                                 rangeFloat
                                 range
                                 pips
+                                on:change={(event) => handlePartitionRange(partition, event.detail.values)}
                             />
                         </Column>
                     </Row>
