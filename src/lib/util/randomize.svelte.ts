@@ -37,6 +37,42 @@ export const getRandomNumber = (min: number, max: number): number => {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+export const getRandomEven = (min: number, max: number): number => {
+    if (min % 2 !== 0) {
+        min++;
+    }
+
+    if (min > max) {
+        return max;
+    }
+
+    return Math.floor(Math.random() * ((max - min) / 2 + 1)) * 2 + min;
+}
+
+export const getRandomOdd = (min: number, max: number): number => {
+    if (min % 2 === 0) {
+        min++;
+    }
+
+    if (min > max) {
+        return max;
+    }
+
+    return min + Math.floor(Math.random() * (Math.floor((max - min) / 2) + 1)) * 2;
+}
+
+function getRandomFromPartition(partition: Partition): number {
+    if (partition.runtime.poolType === "all") {
+        return getRandomNumber(partition.runtime.range[0], partition.runtime.range[1]);
+    } else if (partition.runtime.poolType === "even") {
+        return getRandomEven(partition.runtime.range[0], partition.runtime.range[1]);
+    } else if (partition.runtime.poolType === "odd") {
+        return getRandomOdd(partition.runtime.range[0], partition.runtime.range[1]);
+    } else {
+        return partition.runtime.range[0];
+    }
+}
+
 function makeCache(options: RandomizeOptions): RandomizerCache {
     const selected: SelectedCourse[] = [];
 
@@ -131,9 +167,9 @@ function generateRandomProblemFromSelected(selected: SelectedCourse, problems: S
         return;
     }
 
+    const problem: number = getRandomFromPartition(partition);
     const cNode: CourseNode = cache.courses.getOrElse(selected.course.id, makeCourseNode(selected.course));
     const pNode: PartitionNode = cache.partitions.getOrElse(partition.id, makePartitionNode(partition));
-    const problem: number = getRandomNumber(partition.runtime.range[0], partition.runtime.range[1]);
 
     problems.add(problem);
     pNode.problems.add(problem);

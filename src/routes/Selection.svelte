@@ -12,15 +12,15 @@
         Tile
     } from "carbon-components-svelte";
 
-    import { ListBoxes, ListChecked } from "carbon-icons-svelte";
+    import { CharacterWholeNumber, ListBoxes, ListChecked, Number_1, Number_2 } from "carbon-icons-svelte";
     import { RangeSlider } from "svelte-range-slider-pips";
 
+    import type { Partition, PoolType } from "$lib/types/Partition.svelte";
     import type { Course } from "$lib/types/Course.svelte";
     import { config } from "$lib/config.svelte.js";
     import { onMount } from "svelte";
     import { isMobileDevice } from "$lib/util/misc";
     import { globalPoolSize, selection } from "$lib/util/randomize.svelte";
-    import type { Partition } from "$lib/types/Partition.svelte";
 
     let isMobile: boolean = $state(false);
 
@@ -127,6 +127,12 @@
     function handlePartitionRange(partition: Partition, range: number[]): void {
         partition.runtime.range[0] = range[0];
         partition.runtime.range[1] = range[1];
+    }
+
+    function handlePoolBatchEdit(course: Course, type: PoolType): void {
+        course.partitions.forEach(partition => {
+            partition.runtime.poolType = type;
+        });
     }
 </script>
 
@@ -238,6 +244,37 @@
                     {/if}
                 </Column>
             </Row>
+            <Row style="margin-top: 8px;">
+                <Button
+                    disabled={!course.runtime.selected}
+                    style="margin-right: 4px;"
+                    size="small"
+                    kind="tertiary"
+                    iconDescription="2&#8469+1 (Odd)"
+                    icon={Number_1}
+                    on:click={() => handlePoolBatchEdit(course, "odd")}
+                />
+                <Button
+                    disabled={!course.runtime.selected}
+                    style="margin-right: 4px;"
+                    size="small"
+                    kind="tertiary"
+                    iconDescription="&#8469 (All)"
+                    icon={CharacterWholeNumber}
+                    on:click={() => handlePoolBatchEdit(course, "all")}
+                />
+                <Button
+                    disabled={!course.runtime.selected}
+                    size="small"
+                    kind="tertiary"
+                    iconDescription="2&#8469 (Even)"
+                    icon={Number_2}
+                    on:click={() => handlePoolBatchEdit(course, "even")}
+                />
+            </Row>
+            <Row style="margin-top: .25rem;">
+                <p class="note">Toggle all partitions to use the set of all odd or even natural integers.</p>
+            </Row>
         </Grid>
     </Tile>
     <Accordion align="start">
@@ -254,7 +291,7 @@
                 {/if}
                 <Grid condensed>
                     <Row>
-                        <Column>
+                        <Column lg={4}>
                             <Checkbox
                                 labelText={partition.name}
                                 helperText={partition.description === "" ? "No description." : partition.description}
@@ -265,7 +302,33 @@
                                 }}
                             />
                         </Column>
-                        <Column>
+                        <Column lg={4}>
+                            <Button
+                                isSelected={partition.runtime.poolType === "odd"}
+                                disabled={!partition.runtime.selected || !course.runtime.selected}
+                                kind="ghost"
+                                iconDescription="2&#8469+1 (Odd)"
+                                icon={Number_1}
+                                on:click={() => partition.runtime.poolType = "odd"}
+                            />
+                            <Button
+                                isSelected={partition.runtime.poolType === "all"}
+                                disabled={!partition.runtime.selected || !course.runtime.selected}
+                                kind="ghost"
+                                iconDescription="&#8469 (All)"
+                                icon={CharacterWholeNumber}
+                                on:click={() => partition.runtime.poolType = "all"}
+                            />
+                            <Button
+                                isSelected={partition.runtime.poolType === "even"}
+                                disabled={!partition.runtime.selected || !course.runtime.selected}
+                                kind="ghost"
+                                iconDescription="2&#8469 (Even)"
+                                icon={Number_2}
+                                on:click={() => partition.runtime.poolType = "even"}
+                            />
+                        </Column>
+                        <Column lg={8}>
                             <RangeSlider
                                 id="always"
                                 values={[...partition.runtime.range]}

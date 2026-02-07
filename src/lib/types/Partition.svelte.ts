@@ -1,9 +1,12 @@
 import { Course } from "$lib/types/Course.svelte";
 
+export type PoolType = "all" | "even" | "odd";
+
 interface Runtime {
     selected: boolean;
     range: number[];
     numberOfProblems: number;
+    poolType: PoolType
 }
 
 export class Partition {
@@ -25,7 +28,8 @@ export class Partition {
         this.runtime = $state({
             selected: false,
             range: [this.startAt, this.endAt],
-            numberOfProblems: 1
+            numberOfProblems: 1,
+            poolType: "all"
         });
 
         Object.defineProperty(this, "parent", {
