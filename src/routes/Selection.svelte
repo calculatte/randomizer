@@ -273,7 +273,9 @@
                 />
             </Row>
             <Row style="margin-top: .25rem;">
-                <p class="note">Toggle all partitions to use the set of all odd or even natural integers.</p>
+                <p class="note" style="color: {!course.runtime.selected ? 'var(--cds-disabled-02, #c6c6c6)' : 'inherit'};">
+                    Toggle all partitions to use the set of all odd or even natural integers.
+                </p>
             </Row>
         </Grid>
     </Tile>
