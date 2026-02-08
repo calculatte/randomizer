@@ -187,7 +187,7 @@
 <Header bind:isSideNavOpen persistentHamburgerMenu={true}>
     <span slot="platform">
         Homework Randomizer
-        <code class="code" style="margin-left: 4px;">v0.0.12</code>
+        <code class="code" style="margin-left: 4px;">v0.0.14</code>
     </span>
     <svelte:fragment slot="skip-to-content">
         <SkipToContent />
