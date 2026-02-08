@@ -31,6 +31,8 @@
     let expandTree: boolean = $state(false);
     let clearedTree: boolean = $state(false);
     let hideEmptyNodes: boolean = $state(false);
+    let randomizeCourses: boolean = $state(false);
+    let randomizePartitions: boolean = $state(false);
 
     onMount(() => {
         if ($results.length > 0) {
@@ -66,7 +68,9 @@
                         selection,
                         poolSize,
                         pullFromAll,
-                        hideEmptyNodes
+                        hideEmptyNodes,
+                        randomizeCourses,
+                        randomizePartitions
                     });
 
                     clearedTree = false;
@@ -157,6 +161,24 @@
                                 labelText="Hide missing"
                                 helperText="Do not include empty nodes in the results tree."
                                 bind:checked={hideEmptyNodes}
+                            />
+                        </div>
+                    </Row>
+                    <Row>
+                        <div style="margin-left: 6px; margin-top: 4px;">
+                            <Checkbox
+                                labelText="Randomize courses"
+                                helperText="Display selected courses within the results tree randomly."
+                                bind:checked={randomizeCourses}
+                            />
+                        </div>
+                    </Row>
+                    <Row>
+                        <div style="margin-left: 6px; margin-top: 4px;">
+                            <Checkbox
+                                labelText="Randomize partitions"
+                                helperText="Display selected partitions within the results tree randomly."
+                                bind:checked={randomizePartitions}
                             />
                         </div>
                     </Row>

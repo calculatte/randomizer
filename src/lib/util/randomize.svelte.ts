@@ -23,6 +23,8 @@ export interface RandomizeOptions {
     poolSize: number;
     pullFromAll: boolean;
     hideEmptyNodes: boolean;
+    randomizeCourses: boolean;
+    randomizePartitions: boolean;
 }
 
 export interface SelectionState {
@@ -143,6 +145,18 @@ function generateNodeTree(options: RandomizeOptions, cache: RandomizerCache): Co
 
     for (const cNode of coursesToDestroy) {
         cache.courses.delete(cNode.id.toString());
+    }
+
+    if (options.randomizeCourses) {
+        const courses = ArrayUtil.shuffle(cache.courses.values());
+
+        if (options.randomizePartitions) {
+            for (const course of courses) {
+                course.nodes = ArrayUtil.shuffle(course.nodes);
+            }
+        }
+
+        return courses;
     }
 
     return cache.courses.values();
