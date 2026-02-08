@@ -1,5 +1,15 @@
 import { getRandomNumber } from "./randomize.svelte";
 
+function shuffle<T>(array: T[]): T[] {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+
+    return array;
+}
+
 function getRandom<T>(array: T[]): T | undefined {
     if (array.length === 0) {
         return undefined;
@@ -30,6 +40,7 @@ function removeIf<T>(array: T[], predicate: (element: T) => boolean): void {
 }
 
 export const ArrayUtil = {
+    shuffle,
     getRandom,
     removeIf,
     remove
