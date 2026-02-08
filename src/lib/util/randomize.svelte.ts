@@ -157,6 +157,14 @@ function generateNodeTree(options: RandomizeOptions, cache: RandomizerCache): Co
         }
 
         return courses;
+    } else if (options.randomizePartitions) {
+        const courses = cache.courses.values();
+
+        for (const course of courses) {
+            course.nodes = ArrayUtil.shuffle(course.nodes);
+        }
+
+        return courses;
     }
 
     return cache.courses.values();
